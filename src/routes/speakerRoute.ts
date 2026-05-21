@@ -1,5 +1,5 @@
 import express from "express";
-import { getSpeakers, createSpeaker, showSpeaker,updateSpeakerById, deleteSpeakerById } from "../controllers/speakerController";
+import { getSpeakers, createSpeaker, showSpeaker,updateSpeaker, deleteSpeaker } from "../controllers/speakerController.js";
 
 const router = express.Router();
 
@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/", getSpeakers);
 router.post("/", createSpeaker);
 router.get("/:id", showSpeaker);
-router.put("/:id", updateSpeakerById);
-router.delete("/:id", deleteSpeakerById);
+router.put("/:id", updateSpeaker);
+router.delete("/:id", deleteSpeaker);
 
 export default router;

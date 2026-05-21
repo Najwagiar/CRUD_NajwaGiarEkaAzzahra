@@ -1,89 +1,135 @@
 import { Request, Response } from "express";
-import { Category } from "../types/category";
+import { prisma } from "../lib/db.js";
 
-let categories: Category[] = [];
 
-// 1. Menampilkan daftar category
-export const getCategories = (req: Request, res: Response) => {
-  res.json(categories);
-};
+// GET ALL CATEGORIES
+export const getCategories = async (req: Request, res: Response) => {
+  try {
+    const categories = await prisma.category.findMany();
 
-// 2. Menyimpan data category baru
-export const createCategory = (req: Request, res: Response) => {
-  const { id, name } = req.body;
+    res.json(categories);
 
-  // Validasi Sederhana, jika name belum diisi
-  if (!id || !name) {
-    res.status(500).json({ message: "Id dan Name harus diisi" });
-  }
-
-  // Jika validasi berhasil
-  const newCategory: Category = {
-    id: Date.now(),
-    name: name,
-  };
-
-  // Jika sudah disusun, simpan ke array atau database
-  categories.push(newCategory);
-
-  // Jika data berhasil disimpan
-  res
-    .status(200)
-    .json({ message: "Data berhasil disimpan", Category: newCategory });
-};
-
-// 3. Menampilkan detail category berdasarkan ID
-export const showCategory = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-
-  const category = categories.find((item) => item.id === id);
-
-  if (!category) {
-    return res.status(404).json({
-      message: "Category tidak ditemukan",
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal mengambil data category",
+      error,
     });
   }
-
-  res.status(200).json(category);
 };
 
-// 4. Mengupdate data category berdasarkan ID
-export const updateCategory = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const { name } = req.body;
 
-  const category = categories.find((item) => item.id === id);
+// CREATE CATEGORY
+export const createCategory = async (req: Request, res: Response) => {
+  try {
+    const { name } = req.body;
 
-  if (!category) {
-    return res.status(404).json({
-      message: "Category tidak ditemukan",
+    if (!name) {
+      return res.status(400).json({
+        message: "Name wajib diisi",
+      });
+    }
+
+    const newCategory = await prisma.category.create({
+      data: {
+        name,
+      },
+    });
+
+    res.status(201).json({
+      message: "Category berhasil dibuat",
+      data: newCategory,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal membuat category",
+      error,
     });
   }
-
-  // update data
-  category.name = name || category.name;
-
-  res.status(200).json({
-    message: "Category berhasil diupdate",
-    category,
-  });
 };
 
-// 5. Menghapus data category berdasarkan ID
-export const deleteCategory = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
 
-  const category = categories.find((item) => item.id === id);
+// GET CATEGORY BY ID
+export const showCategory = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
 
-  if (!category) {
-    return res.status(404).json({
-      message: "Category tidak ditemukan",
+    const category = await prisma.category.findUnique({
+      where: { id },
+    });
+
+    if (!category) {
+      return res.status(404).json({
+        message: "Category tidak ditemukan",
+      });
+    }
+
+    res.json(category);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal mengambil detail category",
+      error,
     });
   }
+};
 
-  categories = categories.filter((item) => item.id !== id);
 
-  res.status(200).json({
-    message: "Category berhasil dihapus",
-  });
+// UPDATE CATEGORY
+export const updateCategory = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    const existingCategory = await prisma.category.findUnique({
+      where: { id },
+    });
+
+    if (!existingCategory) {
+      return res.status(404).json({
+        message: "Category tidak ditemukan",
+      });
+    }
+
+    const { name } = req.body;
+
+    const updatedCategory = await prisma.category.update({
+      where: { id },
+      data: {
+        name,
+      },
+    });
+
+    res.json({
+      message: "Category berhasil diupdate",
+      data: updatedCategory,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal update category",
+      error,
+    });
+  }
+};
+
+
+// DELETE CATEGORY
+export const deleteCategory = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    await prisma.category.delete({
+      where: { id },
+    });
+
+    res.json({
+      message: "Category berhasil dihapus",
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal menghapus category",
+      error,
+    });
+  }
 };

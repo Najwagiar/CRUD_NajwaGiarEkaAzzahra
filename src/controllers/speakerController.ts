@@ -1,94 +1,139 @@
 import { Request, Response } from "express";
-import { speaker } from "../types/speaker";
+import { prisma } from "../lib/db.js";
 
-let speakers: speaker[] = [];
 
-// 1. Menampilkan daftar speaker
-export const getSpeakers = (req: Request, res: Response) => {
-  res.json(speakers);
-};
+// GET ALL SPEAKERS
+export const getSpeakers = async (req: Request, res: Response) => {
+  try {
+    const speakers = await prisma.pembicara.findMany();
 
-// 2. Menyimpan data speaker baru
-export const createSpeaker = (req: Request, res: Response) => {
-  const { name, role, image } = req.body;
+    res.json(speakers);
 
-  // buat validasi sederhana untuk memastikan semua field diisi
-  if (!name || !role || !image) {
-    return res.status(400).json({ message: "Semua field harus diisi" });
-  }
-
-  // Jika validasi berhasil
-  const newSpeaker: speaker = {
-    id: speakers.length + 1,
-    name: name,
-    role: role,
-    image: image,
-  };
-
-  // Jika sudah diisi, maka akan di simpan di array atau database
-  speakers.push(newSpeaker);
-
-  // Jika berhasil disimpan
-  res
-    .status(201)
-    .json({ message: "Data berhasil di simpan", speaker: newSpeaker });
-};
-
-// 3. Menampilkan detail speaker berdasarkan ID
-export const showSpeaker = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-
-  const dataSpeaker = speakers.find((item) => item.id === id);
-
-  if (!dataSpeaker) {
-    return res.status(404).json({
-      message: "Speaker tidak ditemukan",
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal mengambil data speaker",
+      error,
     });
   }
-
-  res.status(200).json(dataSpeaker);
 };
 
-// 4. Mengupdate data speaker berdasarkan ID
-export const updateSpeakerById = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
 
-  const { name, role, image } = req.body;
+// CREATE SPEAKER
+export const createSpeaker = async (req: Request, res: Response) => {
+  try {
+    const { name, role, image } = req.body;
 
-  const dataSpeaker = speakers.find((item) => item.id === id);
+    if (!name || !role || !image) {
+      return res.status(400).json({
+        message: "Semua field wajib diisi",
+      });
+    }
 
-  if (!dataSpeaker) {
-    return res.status(404).json({
-      message: "Speaker tidak ditemukan",
+    const newSpeaker = await prisma.pembicara.create({
+      data: {
+        name,
+        role,
+        image,
+      },
+    });
+
+    res.status(201).json({
+      message: "Speaker berhasil dibuat",
+      data: newSpeaker,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal membuat speaker",
+      error,
     });
   }
-
-  // Update data
-  dataSpeaker.name = name || dataSpeaker.name;
-  dataSpeaker.role = role || dataSpeaker.role;
-  dataSpeaker.image = image || dataSpeaker.image;
-
-  res.status(200).json({
-    message: "Speaker berhasil diupdate",
-    speaker: dataSpeaker,
-  });
 };
 
-// 5. Menghapus data speaker berdasarkan ID
-export const deleteSpeakerById = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
 
-  const dataSpeaker = speakers.find((item) => item.id === id);
+// GET SPEAKER BY ID
+export const showSpeaker = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
 
-  if (!dataSpeaker) {
-    return res.status(404).json({
-      message: "Speaker tidak ditemukan",
+    const speaker = await prisma.pembicara.findUnique({
+      where: { id },
+    });
+
+    if (!speaker) {
+      return res.status(404).json({
+        message: "Speaker tidak ditemukan",
+      });
+    }
+
+    res.json(speaker);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal mengambil detail speaker",
+      error,
     });
   }
+};
 
-  speakers = speakers.filter((item) => item.id !== id);
 
-  res.status(200).json({
-    message: "Speaker berhasil dihapus",
-  });
+// UPDATE SPEAKER
+export const updateSpeaker = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    const existingSpeaker = await prisma.pembicara.findUnique({
+      where: { id },
+    });
+
+    if (!existingSpeaker) {
+      return res.status(404).json({
+        message: "Speaker tidak ditemukan",
+      });
+    }
+
+    const { name, role, image } = req.body;
+
+    const updatedSpeaker = await prisma.pembicara.update({
+      where: { id },
+      data: {
+        name,
+        role,
+        image,
+      },
+    });
+
+    res.json({
+      message: "Speaker berhasil diupdate",
+      data: updatedSpeaker,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal update speaker",
+      error,
+    });
+  }
+};
+
+
+// DELETE SPEAKER
+export const deleteSpeaker = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    await prisma.pembicara.delete({
+      where: { id },
+    });
+
+    res.json({
+      message: "Speaker berhasil dihapus",
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal menghapus speaker",
+      error,
+    });
+  }
 };
