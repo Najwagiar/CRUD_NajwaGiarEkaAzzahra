@@ -6,14 +6,10 @@ import { prisma } from "../lib/db.js";
 export const getCategories = async (req: Request, res: Response) => {
   try {
     const categories = await prisma.category.findMany();
-
-    res.json(categories);
-
+    // Kita bungkus jadi { data: [] } biar rapi
+    res.json({ data: categories }); 
   } catch (error) {
-    res.status(500).json({
-      message: "Gagal mengambil data category",
-      error,
-    });
+    res.status(500).json({ message: "Gagal ambil data", error });
   }
 };
 

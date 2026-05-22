@@ -23,9 +23,10 @@ export const createSpeaker = async (req: Request, res: Response) => {
   try {
     const { name, role, image } = req.body;
 
-    if (!name || !role || !image) {
+    // IMAGE TIDAK WAJIB
+    if (!name || !role) {
       return res.status(400).json({
-        message: "Semua field wajib diisi",
+        message: "Name dan Role wajib diisi",
       });
     }
 
@@ -33,7 +34,7 @@ export const createSpeaker = async (req: Request, res: Response) => {
       data: {
         name,
         role,
-        image,
+        image: image || "",
       },
     });
 
@@ -43,6 +44,8 @@ export const createSpeaker = async (req: Request, res: Response) => {
     });
 
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       message: "Gagal membuat speaker",
       error,
@@ -99,7 +102,7 @@ export const updateSpeaker = async (req: Request, res: Response) => {
       data: {
         name,
         role,
-        image,
+        image: image || "",
       },
     });
 
