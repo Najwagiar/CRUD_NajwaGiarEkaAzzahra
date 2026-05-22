@@ -18,21 +18,24 @@ export const getEvents = async (req: Request, res: Response) => {
 // CREATE EVENT
 export const createEvent = async (req: Request, res: Response) => {
   try {
-    const { name, categoryId, location, dateEvent, description } = req.body;
+    // 1. Tambahkan pembicaraId ke dalam destructuring req.body
+    const { name, categoryId, location, dateEvent, description, pembicaraId } = req.body;
 
-    if (!name || !categoryId || !location || !dateEvent || !description) {
+    // 2. Tambahkan pembicaraId ke validasi
+    if (!name || !categoryId || !location || !dateEvent || !description || !pembicaraId) {
       return res.status(400).json({
-        message: "Semua field wajib diisi",
+        message: "Semua field wajib diisi (termasuk pembicara)",
       });
     }
 
     const newEvent = await prisma.event.create({
       data: {
-        name,
-        categoryId,
+          name,
+        categoryId: Number(categoryId), // Pastikan tipenya Int
         location,
         dateEvent: new Date(dateEvent),
         description,
+        pembicaraId: Number(pembicaraId), // Pastikan tipenya Int
       },
     });
 
@@ -41,9 +44,10 @@ export const createEvent = async (req: Request, res: Response) => {
       data: newEvent,
     });
   } catch (error) {
+    console.error("Error creating event:", error);
     res.status(500).json({
       message: "Gagal membuat event",
-      error,
+      error: error,
     });
   }
 };
