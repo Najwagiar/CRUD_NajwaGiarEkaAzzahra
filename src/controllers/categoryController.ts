@@ -13,11 +13,10 @@ export const getCategories = async (req: Request, res: Response) => {
   }
 };
 
-
-// CREATE CATEGORY
+// CREATE CATEGORY (Di backend)
 export const createCategory = async (req: Request, res: Response) => {
   try {
-    const { name } = req.body;
+    const { name, description } = req.body; // Tambahkan description di sini
 
     if (!name) {
       return res.status(400).json({
@@ -28,6 +27,7 @@ export const createCategory = async (req: Request, res: Response) => {
     const newCategory = await prisma.category.create({
       data: {
         name,
+        description, // Pastikan ini sesuai dengan nama kolom di schema.prisma
       },
     });
 
@@ -35,15 +35,14 @@ export const createCategory = async (req: Request, res: Response) => {
       message: "Category berhasil dibuat",
       data: newCategory,
     });
-
   } catch (error) {
+    console.error(error); // Tambahkan log ini untuk melihat error detail di Railway
     res.status(500).json({
       message: "Gagal membuat category",
-      error,
+      error: error,
     });
   }
 };
-
 
 // GET CATEGORY BY ID
 export const showCategory = async (req: Request, res: Response) => {
