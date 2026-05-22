@@ -7,10 +7,9 @@ export const getSpeakers = async (req: Request, res: Response) => {
   try {
     const speakers = await prisma.pembicara.findMany();
 
-    res.json(speakers);
-
+    return res.json(speakers);
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Gagal mengambil data speaker",
       error,
     });
@@ -18,14 +17,15 @@ export const getSpeakers = async (req: Request, res: Response) => {
 };
 
 
-// CREATE SPEAKER
+// CREATE SPEAKER (IMAGE WAJIB)
 export const createSpeaker = async (req: Request, res: Response) => {
   try {
     const { name, role, image } = req.body;
 
+    // 🔥 VALIDASI WAJIB SEMUA FIELD
     if (!name || !role || !image) {
       return res.status(400).json({
-        message: "Semua field wajib diisi",
+        message: "Name, role, dan image wajib diisi",
       });
     }
 
@@ -37,13 +37,13 @@ export const createSpeaker = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Speaker berhasil dibuat",
       data: newSpeaker,
     });
 
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Gagal membuat speaker",
       error,
     });
@@ -66,10 +66,9 @@ export const showSpeaker = async (req: Request, res: Response) => {
       });
     }
 
-    res.json(speaker);
-
+    return res.json(speaker);
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Gagal mengambil detail speaker",
       error,
     });
@@ -94,6 +93,12 @@ export const updateSpeaker = async (req: Request, res: Response) => {
 
     const { name, role, image } = req.body;
 
+    if (!name || !role || !image) {
+      return res.status(400).json({
+        message: "Name, role, dan image wajib diisi",
+      });
+    }
+
     const updatedSpeaker = await prisma.pembicara.update({
       where: { id },
       data: {
@@ -103,13 +108,13 @@ export const updateSpeaker = async (req: Request, res: Response) => {
       },
     });
 
-    res.json({
+    return res.json({
       message: "Speaker berhasil diupdate",
       data: updatedSpeaker,
     });
 
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Gagal update speaker",
       error,
     });
@@ -126,12 +131,12 @@ export const deleteSpeaker = async (req: Request, res: Response) => {
       where: { id },
     });
 
-    res.json({
+    return res.json({
       message: "Speaker berhasil dihapus",
     });
 
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Gagal menghapus speaker",
       error,
     });
