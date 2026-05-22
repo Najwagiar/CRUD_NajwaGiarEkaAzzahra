@@ -16,6 +16,7 @@ datasource db {
 model Category {
   id        Int      @id @default(autoincrement())
   name      String
+  description String   @db.Text
   createdAt DateTime @default(now()) @map("created_at")
 
   events Event[]
@@ -31,8 +32,10 @@ model Event {
   dateEvent   DateTime @map("date_event")
   description String   @db.Text
   createdAt   DateTime @default(now()) @map("created_at")
+  pembicaraId  Int      @map("pembicara_id")
 
   category Category @relation(fields: [categoryId], references: [id])
+  pembicara Pembicara @relation(fields: [pembicaraId], references: [id])
 
   @@map("events")
 }
@@ -43,6 +46,8 @@ model Pembicara {
   role      String
   image     String
   createdAt DateTime @default(now()) @map("created_at")
+
+  events Event[]
 
   @@map("pembicaras")
 }
