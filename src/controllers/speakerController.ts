@@ -22,7 +22,7 @@ export const createSpeaker = async (req: Request, res: Response) => {
   try {
     const { name, role, image } = req.body;
 
-    // 🔥 VALIDASI WAJIB SEMUA FIELD
+    //  VALIDASI WAJIB SEMUA FIELD
     if (!name || !role || !image) {
       return res.status(400).json({
         message: "Name, role, dan image wajib diisi",
