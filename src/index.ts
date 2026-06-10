@@ -17,7 +17,7 @@ app.get("/", (req, res) =>{
 });
 
 app.use("/events",eventRoutes);
-app.use("/categories",  categoryRoutes);
+app.use("/category",  categoryRoutes);
 app.use("/speakers", speakerRoutes);
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
